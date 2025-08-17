@@ -1,0 +1,9 @@
+IMAGE_INSTALL:append = " \
+	usbutils \
+	coreutils \
+	e2fsprogs \
+	dosfstools \
+	util-linux \
+	tar \
+	busybox \
+"

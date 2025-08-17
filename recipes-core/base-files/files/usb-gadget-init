@@ -1,0 +1,77 @@
+#!/bin/sh
+echo "Starting USB Gadget initialization"
+
+# Mount ConfigFS if not already mounted
+if ! mount | grep -q configfs; then
+    echo "Mounting configfs..."
+    mount -t configfs none /sys/kernel/config
+fi
+
+# Wait for configfs to be ready
+while [ ! -d /sys/kernel/config/usb_gadget ]; do
+    echo "Waiting for configfs/usb_gadget..."
+    sleep 1
+done
+
+echo "ConfigFS mounted successfully"
+
+# Create USB gadget
+mkdir -p /sys/kernel/config/usb_gadget/g1
+cd /sys/kernel/config/usb_gadget/g1
+
+echo "Created gadget directory"
+
+# Set USB device descriptors
+echo 0x1d6b > idVendor
+echo 0x0104 > idProduct
+
+# Set USB string descriptors
+mkdir -p strings/0x409
+echo "0123456789" > strings/0x409/serialnumber
+echo "Texas Instruments" > strings/0x409/manufacturer
+echo "BeagleBone Black" > strings/0x409/product
+
+echo "Set USB strings"
+
+# Create RNDIS function
+mkdir -p functions/rndis.usb0
+echo "Created RNDIS function"
+
+# Create configuration
+mkdir -p configs/c.1/strings/0x409
+echo "RNDIS" > configs/c.1/strings/0x409/configuration
+
+# Link function to configuration
+ln -s functions/rndis.usb0 configs/c.1/
+echo "Linked function to configuration"
+
+# Enable gadget
+echo musb-hdrc.0 > UDC
+echo "Enabled gadget"
+
+# Wait for interface to appear
+sleep 3
+
+# Configure network interface
+if [ -e /sys/class/net/usb0 ]; then
+    ifconfig usb0 192.168.7.2 netmask 255.255.255.0 up
+    echo "USB Gadget network interface configured at 192.168.7.2"
+    
+    # Setup SSH directories
+    mkdir -p /var/run/sshd
+    chmod 755 /var/run/sshd
+    mkdir -p /var/empty
+    chmod 755 /var/empty
+    
+    # Generate SSH host keys if they don't exist
+    if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+        echo "Generating SSH host keys..."
+        ssh-keygen -A
+    fi
+    
+    # Start SSH daemon
+    /usr/sbin/sshd
+    echo "SSH daemon started"
+else
+    echo "USB Gadget network interface not found"
+fi
