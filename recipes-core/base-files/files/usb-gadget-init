@@ -1,4 +1,6 @@
 #!/bin/sh
+# meta-bonehub/recipes-core/base-files/files/usb-gadget-setup
+
 echo "Starting USB Gadget initialization"
 
 # Mount ConfigFS if not already mounted
@@ -52,9 +54,20 @@ echo "Enabled gadget"
 # Wait for interface to appear
 sleep 3
 
-# Configure network interface
+# Configure network interface using systemd-networkd
 if [ -e /sys/class/net/usb0 ]; then
-    ifconfig usb0 192.168.7.2 netmask 255.255.255.0 up
+    # Create networkd configuration
+    cat > /etc/systemd/network/20-usb0.network << EOF
+[Match]
+Name=usb0
+
+[Network]
+Address=192.168.7.2/24
+EOF
+
+    # Restart networkd to apply configuration
+    systemctl restart systemd-networkd
+    
     echo "USB Gadget network interface configured at 192.168.7.2"
     
     # Setup SSH directories
@@ -70,8 +83,10 @@ if [ -e /sys/class/net/usb0 ]; then
     fi
     
     # Start SSH daemon
-    /usr/sbin/sshd
-    echo "SSH daemon started"
+    systemctl start sshd
+    systemctl enable sshd
+    echo "SSH daemon started and enabled"
 else
     echo "USB Gadget network interface not found"
+    exit 1
 fi

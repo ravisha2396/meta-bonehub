@@ -1,10 +1,20 @@
+
+# meta-bonehub/recipes-core/base-files/base-files_%.bbappend
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
-SRC_URI += "file://usb-gadget-init"
+SRC_URI += "file://usb-gadget.service file://usb-gadget-init"
 
 do_install:append() {
-    # Install USB gadget init script
-    install -d ${D}${sysconfdir}/init.d
-    install -m 0755 ${S}/usb-gadget-init ${D}${sysconfdir}/init.d/
+    # Install systemd service
+    install -d ${D}${systemd_system_unitdir}
+    install -m 0644 ${S}/usb-gadget.service ${D}${systemd_system_unitdir}/
+    
+    # Install setup script
+    install -d ${D}${bindir}
+    install -m 0755 ${S}/usb-gadget-init ${D}${bindir}/
+    
+    # Enable service
+    install -d ${D}${systemd_system_unitdir}/multi-user.target.wants
+    ln -sf ../usb-gadget.service ${D}${systemd_system_unitdir}/multi-user.target.wants/
     
     # Add configfs entry to existing fstab
     echo "configfs  /sys/kernel/config  configfs  defaults  0  0" >> ${D}${sysconfdir}/fstab
@@ -14,8 +24,4 @@ do_install:append() {
     install -d ${D}/var/empty
     chmod 755 ${D}/var/run/sshd
     chmod 755 ${D}/var/empty
-    
-    # Create rc.d directory and symlink
-    install -d ${D}${sysconfdir}/rc.d
-    ln -sf ../init.d/usb-gadget-init ${D}${sysconfdir}/rc.d/S40usb-gadget
 }

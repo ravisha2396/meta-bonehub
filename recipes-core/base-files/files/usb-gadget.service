@@ -1,0 +1,16 @@
+# meta-bonehub/recipes-core/base-files/files/usb-gadget.service
+[Unit]
+Description=USB Gadget Setup
+After=sys-kernel-config.mount
+Before=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/usb-gadget-init
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
