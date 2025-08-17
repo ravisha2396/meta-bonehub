@@ -1,0 +1,49 @@
+# Yocto build artifacts
+tmp/
+downloads/
+sstate-cache/
+build/
+*.tar.bz2
+*.wic
+*.ext4
+*.img
+*.jffs2
+
+# Build configuration (user-specific)
+conf/local.conf
+conf/bblayers.conf
+
+# OS files
+.DS_Store
+*~
+*.swp
+*.swo
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Documentation build
+docs/_build/
+docs/build/
+
+# Test artifacts
+test-results/
+coverage/
