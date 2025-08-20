@@ -1,7 +1,10 @@
 
 # meta-bonehub/recipes-core/base-files/base-files_%.bbappend
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
-SRC_URI += "file://usb-gadget.service file://usb-gadget-init"
+SRC_URI += "file://usb-gadget.service file://usb-gadget-init file://sd-card-flasher.sh"
+
+# Add bash dependency since sd-card-flasher.sh requires /bin/bash
+RDEPENDS:${PN} += "bash"
 
 do_install:append() {
     # Install systemd service
@@ -24,4 +27,9 @@ do_install:append() {
     install -d ${D}/var/empty
     chmod 755 ${D}/var/run/sshd
     chmod 755 ${D}/var/empty
+    
+    # Create /home/root directory and install eMMC flasher
+    install -d ${D}/home/root
+    install -m 0755 ${S}/sd-card-flasher.sh ${D}/home/root/
+    chmod 755 ${D}/home/root
 }

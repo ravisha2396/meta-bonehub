@@ -2,7 +2,7 @@
 IMAGE_INSTALL:append = " \
     systemd \
     systemd-serialgetty \
-    packagegroup-core-boot\
+    packagegroup-core-boot \
     openssh \
     openssh-sftp-server \
     openssh-sshd \
@@ -14,6 +14,11 @@ IMAGE_INSTALL:append = " \
     opkg-utils \
     net-tools \
     iproute2 \
+    e2fsprogs \
+    e2fsprogs-mke2fs \
+    dosfstools \
+    sudo \
+    rsync \
 "
 
 IMAGE_FEATURES:append = " ssh-server-openssh"
